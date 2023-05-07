@@ -77,19 +77,19 @@
     <!-- Klient web API 3 - timeout -->
     <script>
       const URL_POST_TIMEOUT = "https://httpbin.org/delay/2";
-      const postTimeoutButton = document.getElementById("postTimeoutButton");
 
       const maxRetries = 3;
       const retryDelay = 1000;
       let retryCount = 0;
 
+      const postTimeoutButton = document.getElementById("postTimeoutButton");
       postTimeoutButton.addEventListener("click", () => {
         postDataWithRetries(URL_POST_TIMEOUT, data, maxRetries, retryDelay);
       });
 
       function postDataWithRetries(url, data, maxRetries, retryDelay) {
         if (retryCount > maxRetries) {
-          console.error("Max retries exceeded, giving up");
+          console.error("retries exceeded");
           return;
         }
 
