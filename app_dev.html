@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Internet App Development - 1</title>
+    <script src="https://cdn.jsdelivr.net/npm/jmespath"></script>
+  </head>
+  <body>
+    <button id="getButton">GET</button>
+    <button id="postButton">POST</button>
+    <button id="postTimeoutButton">POST TIMEOUT</button>
+    <button id="getSuperHeroesButton">GET SUPERHEROES</button>
+    <button id="getSuperHeroesJMESPATHButton">GET SUPERHEROES JMESPATH</button>
+
+    <!-- Klient web API 1 - GET -->
+    <script>
+      const SUPERHEROES_URL =
+        "https://mdn.github.io/learning-area/javascript/oojs/json/superheroes.json";
+
+      const getButton = document.getElementById("getButton");
+      getButton.addEventListener("click", () => {
+        getData(SUPERHEROES_URL);
+      });
+
+      function getData(url) {
+        fetch(url)
+          .then((response) => {
+            if (!response.ok) {
+              throw new Error("error: " + response.status);
+            }
+            return response.json();
+          })
+          .then((data) => {
+            console.log(data);
+          })
+          .catch((error) => {
+            console.error("error: ", error);
+          });
+      }
+    </script>
+
+    <!-- Klient web API 2 - POST -->
+    <script>
+      const URL_POST = "https://httpbin.org/post";
+
+      const data = { name: "natalia" };
+      const postButton = document.getElementById("postButton");
+      postButton.addEventListener("click", () => {
+        postData(URL_POST, data);
+      });
+
+      function postData(url, data) {
+        fetch(url, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify(data),
+        })
+          .then((response) => {
+            if (!response.ok) {
+              throw new Error("error: " + response.status);
+            }
+            return response.json();
+          })
+          .then((data) => {
+            console.log(data);
+          })
+          .catch((error) => {
+            console.error("error: ", error);
+          });
+      }
+    </script>
+
+    <!-- Klient web API 3 - timeout -->
+    <script>
+      const URL_POST_TIMEOUT = "https://httpbin.org/delay/2";
+      const postTimeoutButton = document.getElementById("postTimeoutButton");
+
+      const maxRetries = 3;
+      const retryDelay = 1000;
+      let retryCount = 0;
+
+      postTimeoutButton.addEventListener("click", () => {
+        postDataWithRetries(URL_POST_TIMEOUT, data, maxRetries, retryDelay);
+      });
+
+      function postDataWithRetries(url, data, maxRetries, retryDelay) {
+        if (retryCount > maxRetries) {
+          console.error("Max retries exceeded, giving up");
+          return;
+        }
+
+        fetch(url, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify(data),
+        })
+          .then((response) => {
+            if (!response.ok) {
+              throw new Error("error: " + response.status);
+            }
+            return response.json();
+          })
+          .then((data) => {
+            console.log(data);
+          })
+          .catch((error) => {
+            console.error("error: ", error);
+            console.log(`Retrying in ${retryDelay} ms`);
+            retryCount++;
+            setTimeout(() => {
+              postDataWithRetries(url, data, maxRetries, retryDelay * 2);
+            }, retryDelay);
+          });
+      }
+    </script>
+
+    <!-- Praca z danymi w formacie z JSON 1 -->
+    <script>
+      function getSuperHeroes(url) {
+        fetch(url)
+          .then((response) => response.json())
+          .then((data) => {
+            data.members.forEach((member) => {
+              console.log(member.name);
+            });
+          })
+          .catch((error) => console.error("error:" + error));
+      }
+
+      const getSuperHeroesButton = document.getElementById(
+        "getSuperHeroesButton"
+      );
+      getSuperHeroesButton.addEventListener("click", () => {
+        getSuperHeroes(SUPERHEROES_URL);
+      });
+    </script>
+
+    <!-- Praca z danymi w formacie z JSON 1 - jmespath -->
+    <script>
+      function getSuperHeroesJMESPATH(url) {
+        fetch(url)
+          .then((response) => response.json())
+          .then((data) => {
+            const names = jmespath.search(data, "members[].name");
+            names.forEach((name) => {
+              console.log(name);
+            });
+          })
+          .catch((error) => console.error("error:" + error));
+      }
+
+      const getSuperHeroesJMESPATHButton = document.getElementById(
+        "getSuperHeroesJMESPATHButton"
+      );
+
+      getSuperHeroesJMESPATHButton.addEventListener("click", () => {
+        getSuperHeroesJMESPATH(SUPERHEROES_URL);
+      });
+    </script>
+  </body>
+</html>
